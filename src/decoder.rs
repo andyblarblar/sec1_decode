@@ -1,5 +1,5 @@
 use crate::error::Sec1PemError;
-use der::asn1::{ContextSpecific, OctetString};
+use der::asn1::{ContextSpecific, ObjectIdentifier, OctetString};
 pub use der::{Decodable, Message};
 use std::option::Option::Some;
 
@@ -14,13 +14,15 @@ struct EcPrivateKey_<'a> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-/// The SEC1 EcPrivateKey structure decoded from the PEM.
+/// The SEC1 EcPrivateKey structure decoded from the input.
 pub struct EcPrivateKey {
+    /// The version of the curve.
     pub version: u8,
     /// The private key bytes.
     pub key: Vec<u8>,
-    pub curve: Option<Vec<u8>>, //TODO change this to a curve tag type
-    /// The private key bytes, if included.
+    /// The curve OID.
+    pub curve: Option<ObjectIdentifier>,
+    /// The public key bytes, if included.
     pub public_key: Option<Vec<u8>>,
 }
 
@@ -28,7 +30,7 @@ impl From<EcPrivateKey_<'_>> for EcPrivateKey {
     fn from(other: EcPrivateKey_<'_>) -> Self {
         let version = other.version;
         let key = other.key.as_bytes().to_vec();
-        let curve = other.curve.map(|curve| curve.value.as_bytes().to_vec()); //TODO change this to map to tags
+        let curve = other.curve.map(|curve| curve.value.oid().unwrap());
         let public_key = other
             .public_key
             .map(|pub_k| pub_k.value.as_bytes().to_vec());
@@ -44,7 +46,7 @@ impl From<EcPrivateKey_<'_>> for EcPrivateKey {
 
 const PEM_EC_HEADER: &str = "EC PRIVATE KEY";
 
-/// Attempts to parse an EcPrivateKey sequence from the passed bytes.
+/// Attempts to parse an EcPrivateKey sequence from the passed PEM bytes.
 /// ```
 /// # use sec1_pem::parse_pem;
 /// const PEM:&str = "-----BEGIN EC PRIVATE KEY-----
@@ -71,6 +73,13 @@ pub fn parse_pem(bytes: &[u8]) -> Result<EcPrivateKey, Sec1PemError> {
     }
 }
 
+/// Attempts to parse an EcPrivateKey sequence from the passed DER bytes.
+pub fn parse_der(bytes: &[u8]) -> Result<EcPrivateKey, Sec1PemError> {
+    Ok(EcPrivateKey_::from_der(bytes)
+        .map_err(|_| Sec1PemError::ParseError)?
+        .into())
+}
+
 #[cfg(test)]
 mod test {
     use std::path;
@@ -92,7 +101,7 @@ mod test {
             let path = file.unwrap().path();
 
             //Skip the bad key
-            if path.ends_with("pkcs8eckey.pem") {
+            if path.ends_with("pkcs8eckey.pem") || path.ends_with("private_key.der") {
                 continue;
             }
 
@@ -112,7 +121,7 @@ mod test {
 
     #[test]
     /// Tests that a known key parses.
-    fn test_key_parses() {
+    fn test_key_parses_pem() {
         let mut path = get_path();
         path.push("private_key2.pem"); //This is the key without a curve header.
         let pem = std::fs::read_to_string(path).unwrap();
@@ -123,6 +132,17 @@ mod test {
         let parsed = crate::parse_pem(pem.as_bytes()).unwrap();
 
         assert_eq!(expected, parsed.key)
+    }
+
+    #[test]
+    fn test_key_parses_der() {
+        let mut path = get_path();
+        path.push("private_key.der");
+        let pem = std::fs::read(path).unwrap();
+
+        let parsed = crate::parse_der(&pem).unwrap();
+
+        println!("{:?}", parsed.key);
     }
 
     #[test]

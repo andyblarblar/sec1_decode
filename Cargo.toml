@@ -1,10 +1,10 @@
 [package]
-name = "sec1_pem"
+name = "sec1_decode"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-der = {version = "0.4.1", features = ["derive"]}
+der = {version = "0.4.1", features = ["derive", "oid"]}
 pem = "0.8.3"
 thiserror = "1.0.26"
 
