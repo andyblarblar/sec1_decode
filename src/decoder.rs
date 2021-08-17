@@ -48,7 +48,7 @@ const PEM_EC_HEADER: &str = "EC PRIVATE KEY";
 
 /// Attempts to parse an EcPrivateKey sequence from the passed PEM bytes.
 /// ```
-/// # use sec1_pem::parse_pem;
+/// # use sec1_decode::parse_pem;
 /// const PEM:&str = "-----BEGIN EC PRIVATE KEY-----
 /// MHcCAQEEIASgox4rXoGc6ajVAjBCsjVIjbfHd8OK3m5v34ZWVBmmoAoGCCqGSM49
 /// AwEHoUQDQgAEUfXAsSR5LH4rVdHbcK1vnYcN9I/6T7u1bl1RprSZFf89aZXL+CeG

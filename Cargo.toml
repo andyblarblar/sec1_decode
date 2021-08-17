@@ -2,9 +2,18 @@
 name = "sec1_decode"
 version = "0.1.0"
 edition = "2018"
+license = "Apache-2.0 OR MIT"
+authors = ["Andrew Ealovega <Andrew@Ealovega.dev>"]
+documentation = "https://docs.rs/crate/sec1_decode/"
+description = "Crate for parsing EcPrivateKey structures as defined in SEC1 section C4 from both PEM and DER encodings."
+keywords = ["SEC1", "der", "pem", "ecc"]
+categories = ["cryptography", "encoding"]
+homepage = "https://github.com/andyblarblar/sec1_decode"
+repository = "https://github.com/andyblarblar/sec1_decode"
+readme = "README.md"
 
 [dependencies]
-der = {version = "0.4.1", features = ["derive", "oid"]}
+der = { version = "0.4.1", features = ["derive", "oid"] }
 pem = "0.8.3"
 thiserror = "1.0.26"
 
