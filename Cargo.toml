@@ -14,7 +14,7 @@ readme = "README.md"
 
 [dependencies]
 der = { version = "0.4.1", features = ["derive", "oid"] }
-pem = "0.8.3"
+pem = "4.0.0"
 thiserror = "1.0.26"
 
 [dev-dependencies]

@@ -59,14 +59,14 @@ const PEM_EC_HEADER: &str = "EC PRIVATE KEY";
 /// ```
 pub fn parse_pem(bytes: &[u8]) -> Result<EcPrivateKey, Sec1PemError> {
     //Parse many to account for curve params pem
-    let parsed = pem::parse_many(bytes);
+    let parsed = pem::parse_many(bytes).map_err(|_| Sec1PemError::ParseError)?;
 
-    let pk_pem = parsed.into_iter().find(|pem| pem.tag == PEM_EC_HEADER);
+    let pk_pem = parsed.into_iter().find(|pem| pem.tag() == PEM_EC_HEADER);
 
     if let Some(pk_pem) = pk_pem {
         //Parse der sequence into struct
         let key =
-            EcPrivateKey_::from_der(&pk_pem.contents).map_err(|_| Sec1PemError::ParseError)?;
+            EcPrivateKey_::from_der(pk_pem.contents()).map_err(|_| Sec1PemError::ParseError)?;
         Ok(key.into())
     } else {
         Err(Sec1PemError::NoECPrivateKey)
